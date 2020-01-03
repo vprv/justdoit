@@ -4,8 +4,17 @@ import {useMessage} from "../hooks/message.hook"
 import {AuthContext} from '../context/AuthContext'
 import {useHttp} from "../hooks/http.hook"
 
+import M from 'materialize-css'
+
 export const AccountScreen = () => {
+
+  const autoInit = async () => {
+    await M.AutoInit()
+  }
+
   const {request} = useHttp()
+
+
 
   const {header, container, page, wrapper, listItemStyle} = style
   const history = useHistory()
@@ -26,6 +35,7 @@ export const AccountScreen = () => {
         {Authorization: `Bearer ${token}`}
       )
       setList([...data])
+      autoInit()
     } catch (e) {
 
     }
@@ -33,8 +43,10 @@ export const AccountScreen = () => {
 
 
   useEffect(() => {
+
     getList()
   }, [getList])
+
 
 
   const logoutHandler = event => {
@@ -55,6 +67,7 @@ export const AccountScreen = () => {
       if (inputValue) {
         const text = inputValue
         event.target.value = ''
+        setInputValue('')
         try {
           const data = await request(
             '/api/task/add',
@@ -73,11 +86,27 @@ export const AccountScreen = () => {
   const listItemClickHandler = event => {
     event.preventDefault()
   }
+
+  const makeDoneHandler = async(event, id)=> {
+    event.preventDefault()
+
+    try{
+      const data = await request(
+        '/api/task/done',
+        'POST',
+        {_id: id},
+        {Authorization: `Bearer ${auth.token}`}
+      )
+      if (data.message == 'success') {
+        getList()
+      }
+    } catch (e) {}
+
+  }
+
   const listItemDeleteHandler = async (event, id) => {
     event.preventDefault()
     try {
-      // console.log(id)
-      // const id = await event.target.parentElement.getAttribute('name')
       const data = await request(
         '/api/task/delete',
         'POST',
@@ -87,7 +116,6 @@ export const AccountScreen = () => {
       if (data.message == 'success') {
         getList()
       }
-      // console.log(data)
 
     } catch (e) {
     }
@@ -117,7 +145,7 @@ export const AccountScreen = () => {
 
           <input type="text" name="inputTodo" autoFocus={true}
                  onChange={onChangeHandler} onKeyPress={keyPressed}
-                 placeholder="you have 24h to do it"
+                 placeholder="just do it"
                  style={{textAlign: 'center'}}/>
 
 
@@ -129,14 +157,43 @@ export const AccountScreen = () => {
               [...list].reverse().map((item, index) => {
                 return (
                   <div name={item._id} style={listItemStyle} key={index}>
-                    <a onClick={listItemClickHandler} className={"collection-item"}
+
+
+                    <a onClick={(e)=>{e.preventDefault()}}
+                       className={`collection-item modal-trigger ${item.done ? 'active' : ''}`}
+                        data-target={!item.done ? `modal${index}` : null}
                        style={{flex: 1}}>{item.text}</a>
-                    <a onClick={e => {
+
+
+                   {!item.done ? <a onClick={e => {
                       listItemDeleteHandler(e, item._id)
                     }}
                        className={"collection-item"}>
                       <i className="small material-icons">delete</i>
                     </a>
+                   : null
+                   }
+
+
+
+
+
+                    <div id={`modal${index}`} className="modal">
+                      <div className="modal-content">
+                        <h4>{item.text}</h4>
+                        <p>Are you really have done it? You will not able to cancel it.</p>
+                      </div>
+                      <div className="modal-footer">
+                        <a onClick={e => {
+                          makeDoneHandler(e, item._id)
+                        }} className="modal-close waves-effect waves-green btn-flat">Agree</a>
+                      </div>
+                    </div>
+
+
+
+
+
 
                   </div>
                 )
@@ -191,6 +248,7 @@ const style = {
 
   listItemStyle: {
     display: 'flex',
+    cursor: 'pointer'
 
   }
 }

@@ -39,8 +39,21 @@ router.post('/delete', auth, async (req, res) => {
 })
 
 
+//done task
+router.post('/done', auth, async (req, res) => {
+  try {
+    const {_id} = req.body
 
+    await Task.findByIdAndUpdate(_id, {done: true}, (err, todo) => {
+      if (err) return res.status(500).send(err);
+    })
 
+    res.status(201).json({message: 'success'})
+
+  } catch (e) {
+    res.status(500).json({message: 'Login failed. Something went wrong, try again later'})
+  }
+})
 
 
 //Get task list
@@ -53,14 +66,5 @@ router.get('/', auth,async (req, res) => {
   }
 })
 
-//Get task by id
-// router.get('/:id', auth, async (req, res) => {
-//   try {
-//     const task = await Task.findById(req.params.id)
-//     res.json(task)
-//   } catch (e) {
-//     res.status(500).json({message: 'Login failed. Something went wrong, try again later'})
-//   }
-// })
 
 module.exports = router
