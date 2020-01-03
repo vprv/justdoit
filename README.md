@@ -1,3 +1,3 @@
 # justdoit
 
-jastdoit.tk
+http://jastdoit.tk
