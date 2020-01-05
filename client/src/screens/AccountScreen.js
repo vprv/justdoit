@@ -15,7 +15,6 @@ export const AccountScreen = () => {
   const {request} = useHttp()
 
 
-
   const {header, container, page, wrapper, listItemStyle} = style
   const history = useHistory()
   const auth = useContext(AuthContext)
@@ -48,7 +47,6 @@ export const AccountScreen = () => {
   }, [getList])
 
 
-
   const logoutHandler = event => {
     event.preventDefault()
     auth.logout()
@@ -75,7 +73,12 @@ export const AccountScreen = () => {
             {text: text},
             {Authorization: `Bearer ${auth.token}`}
           )
+
+
           setList([...list, data.task])
+          autoInit()
+
+
         } catch (e) {
         }
       }
@@ -87,10 +90,10 @@ export const AccountScreen = () => {
     event.preventDefault()
   }
 
-  const makeDoneHandler = async(event, id)=> {
+  const makeDoneHandler = async (event, id) => {
     event.preventDefault()
 
-    try{
+    try {
       const data = await request(
         '/api/task/done',
         'POST',
@@ -100,7 +103,8 @@ export const AccountScreen = () => {
       if (data.message == 'success') {
         getList()
       }
-    } catch (e) {}
+    } catch (e) {
+    }
 
   }
 
@@ -159,23 +163,22 @@ export const AccountScreen = () => {
                   <div name={item._id} style={listItemStyle} key={index}>
 
 
-                    <a onClick={(e)=>{e.preventDefault()}}
+                    <a onClick={(e) => {
+                      e.preventDefault()
+                    }}
                        className={`collection-item modal-trigger ${item.done ? 'active' : ''}`}
-                        data-target={!item.done ? `modal${index}` : null}
+                       data-target={!item.done ? `modal${index}` : null}
                        style={{flex: 1}}>{item.text}</a>
 
 
-                   {!item.done ? <a onClick={e => {
-                      listItemDeleteHandler(e, item._id)
-                    }}
-                       className={"collection-item"}>
-                      <i className="small material-icons">delete</i>
-                    </a>
-                   : null
-                   }
-
-
-
+                    {!item.done ? <a onClick={e => {
+                        listItemDeleteHandler(e, item._id)
+                      }}
+                                     className={"collection-item"}>
+                        <i className="small material-icons">delete</i>
+                      </a>
+                      : null
+                    }
 
 
                     <div id={`modal${index}`} className="modal">
@@ -189,10 +192,6 @@ export const AccountScreen = () => {
                         }} className="modal-close waves-effect waves-green btn-flat">Agree</a>
                       </div>
                     </div>
-
-
-
-
 
 
                   </div>
